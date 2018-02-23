@@ -34,7 +34,7 @@ class ImageDecodeController extends AppController
 			$imageName = 'img'.'_'.time().'.'.$ext[1];          // Set unique image name, here appending timestamp to the imagename
 			$path = WWW_ROOT.'img/'.$imageName;                 // Set path to /webroot/img folder
 			$file = new File($path, true, 0644);                // Set write permissions
-			return array('imageName'=>$imageName,'decodedData'=>$decodedData,'path'=>$path);
+			return array('decodedData'=>$decodedData,'path'=>$path);
 		}
 		catch (Exception $e) {		
 			echo json_encode(['status'=>'false','error'=>$e->getMessage()]);
