@@ -14,7 +14,7 @@ class ImageDecodeController extends AppController
 	function getImage($data = null){
 		try{
 			$base64String = $data;                          			//  Your base64 encoded image string
-			$imageData = $this->decodeBase64Image($base64String);			// get decoded image	
+			$imageData = $this->decodeBase64Image($base64String);			// get decoded image and file path to store
 			file_put_contents($imageData['path'], $imageData['decodedData']);      //Write decoded image at the given path
 
 		}
