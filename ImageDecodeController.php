@@ -28,8 +28,8 @@ class ImageDecodeController extends AppController
 		try{
 			$data = explode(',', $base64String);                // exploding the string to get the mime datatype
 			$decodedData = base64_decode($data[1]);             // decoding data, $data[1] is image string in exploded data
-			$result = getimagesize($base64String);              // Get image size
-			$mime = $result['mime'];                            // Get MIME type
+			$imageSize = getimagesize($base64String);           // Get image size and mime info
+			$mime = $imageSize['mime'];                         // Get MIME type
 			$ext = explode('/',$mime);                          // Get File extension
 			$imageName = 'img'.'_'.time().'.'.$ext[1];          // Set unique image name, here appending timestamp to the imagename
 			$path = WWW_ROOT.'img/'.$imageName;                 // Set path to /webroot/img folder
