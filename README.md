@@ -9,6 +9,7 @@ Usage: You have to call the getImage() function in your controller and pass data
     $decodeImage->saveImage($imageData); 
     
 You can additionally check for valid base64 encode by adding this code in the saveImage() function.
+
     if (base64_decode($data, true) === false)
     {
         echo 'Not a Base64-encoded string';
