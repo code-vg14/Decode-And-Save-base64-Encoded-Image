@@ -7,25 +7,24 @@ use Cake\Filesystem\File;
 
 class ImageDecodeController extends AppController
 {
-function beforeFilter(Event $event){
-		parent::beforeFilter($event);	
-		}
+	function beforeFilter(Event $event){
+			parent::beforeFilter($event);				
 	}
-  
-  function getImage(){
+	
+	function getImage(){
 		try{
-				$base64String = 'ADD YOUR base64 STRING HERE';                          //  Your base64 encoded image string
-				$imageData = $this->decodeBase64Image($base64String);				
-				file_put_contents($imageData['path'], $imageData['decodedData']);      //Write decoded image at the given path
-			}
+			$base64String = 'ADD YOUR base64 STRING HERE';                          //  Your base64 encoded image string
+			$imageData = $this->decodeBase64Image($base64String);			// get decoded image	
+			file_put_contents($imageData['path'], $imageData['decodedData']);      //Write decoded image at the given path
+
 		}
 		catch ( \Exception $e ) {
 			$arr = array("Message"=>$e->getMessage());
 			echo json_encode($arr);
 		}
 	}
-public function decodeBase64Image($base64String){
-
+	
+	function decodeBase64Image($base64String){
 		try{
 			$data = explode(',', $base64String);                // exploding the string to get the mime datatype
 			$decodedData = base64_decode($data[1]);             // decoding data, $data[1] is image string in exploded data
@@ -41,5 +40,6 @@ public function decodeBase64Image($base64String){
 			echo json_encode(['status'=>'false','error'=>$e->getMessage()]);
 
 		}
-			
+
 	}
+}
