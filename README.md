@@ -1,6 +1,6 @@
 # Decode-and-save-base64-encoded-image
-This is the code to decode and store any base64 encoded file  in your PHP application (here we are using base64 image string).
-Usage: You have to call the getImage() function in your controller and pass data(encoded image string) to this function.
+This is the code to decode and save any base64 encoded file  in your PHP application (here we are using base64 image string).
+Usage: Use the saveImage() function in your controller and pass data(encoded image string) to this function.
 
     use App\Controller\UsersController
 
