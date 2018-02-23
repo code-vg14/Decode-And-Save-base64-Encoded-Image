@@ -6,4 +6,10 @@ Usage: You have to call the getImage() function in your controller and pass data
 
     $imageData = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/mQll+8'  // ADD YOUR IMAGE STRING HERE
     $decodeImage = new ImageDecodeController();
-    $decodeImage->getImage($imageData); 
+    $decodeImage->saveImage($imageData); 
+    
+You can additionally check for valid base64 encode by adding this code in the saveImage() function.
+    if (base64_decode($data, true) === false)
+    {
+        echo 'Not a Base64-encoded string';
+    }
