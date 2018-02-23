@@ -11,9 +11,9 @@ class ImageDecodeController extends AppController
 			parent::beforeFilter($event);				
 	}
 	
-	function getImage(){
+	function getImage($data = null){
 		try{
-			$base64String = 'ADD YOUR base64 STRING HERE';                          //  Your base64 encoded image string
+			$base64String = $data;                          //  Your base64 encoded image string
 			$imageData = $this->decodeBase64Image($base64String);			// get decoded image	
 			file_put_contents($imageData['path'], $imageData['decodedData']);      //Write decoded image at the given path
 
