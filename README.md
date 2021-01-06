@@ -3,7 +3,6 @@ This is the code to decode and save any base64 encoded file  in your PHP applica
 
 Usage: Use the saveImage() function in your controller and pass data(encoded image string) to this function.
 
-    use App\Controller\UsersController
 
     $imageData = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/mQll+8'  // ADD YOUR IMAGE STRING HERE
     $decodeImage = new ImageDecodeController();
