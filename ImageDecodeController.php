@@ -1,46 +1,115 @@
 <?php
 namespace App\Controller;
-use App\Controller\AppController;
-use Cake\Core\Exception\Exception;
-use Cake\Filesystem\File;
 
+use App\Controller\AppController;
+use Cake\Event\EventInterface;
+use Cake\Http\Exception\BadRequestException;
+use Cake\Http\Response;
+use Exception;
 
 class ImageDecodeController extends AppController
 {
-	function beforeFilter(Event $event){
-			parent::beforeFilter($event);				
-	}
+    /**
+     * BeforeFilter execution hook.
+     * 
+     * @param \Cake\Event\EventInterface $event An Event instance
+     * @return \Cake\Http\Response|null|void
+     */
+    public function beforeFilter(EventInterface $event)
+    {
+        parent::beforeFilter($event);
+        // If using CakePHP Auth, allow access if necessary:
+        // $this->Authentication->addUnauthenticatedActions(['saveImage']);
+    }
 
-	function saveImage($data = null){
-		try{
-			if(isset($data)){		    
-				$base64String = $data;                          		     //  Your base64 encoded image string
-				$imageData = $this->decodeBase64Image($base64String);		     // get decoded image and file path to store
-				file_put_contents($imageData['path'], $imageData['decodedData']);    //Write decoded image at the given path
-			}
-		}
-		catch ( \Exception $e ) {
-			$arr = array("Message"=>$e->getMessage());
-			echo json_encode($arr);
-		}
-	}
-	
-	function decodeBase64Image($base64String){
-		try{
-			$data = explode(',', $base64String);                // exploding the string to get the mime datatype
-			$decodedData = base64_decode($data[1]);             // decoding data, $data[1] is image string in exploded data
-			$imageSize = getimagesize($base64String);           // Get image size and mime info
-			$mime = $imageSize['mime'];                         // Get MIME type
-			$ext = explode('/',$mime);                          // Get File extension
-			$imageName = 'img'.'_'.time().'.'.$ext[1];          // Set unique image name, here appending timestamp to the imagename
-			$path = WWW_ROOT.'img/'.$imageName;                 // Set path to /webroot/img folder
-			$file = new File($path, true, 0644);                // Set write permissions
-			return array('decodedData'=>$decodedData,'path'=>$path);
-		}
-		catch (Exception $e) {		
-			echo json_encode(['status'=>'false','error'=>$e->getMessage()]);
+    /**
+     * Process and save base64 image data.
+     *
+     * @param string|null $data Raw base64 payload
+     * @return \Cake\Http\Response
+     */
+    public function saveImage(?string $data = null): Response
+    {
+        $this->request->allowMethod(['post']); // Enforce secure request method
 
-		}
+        try {
+            if (empty($data)) {
+                throw new BadRequestException('No image data provided.');
+            }
 
-	}
+            $imageData = $this->decodeBase64Image($data);
+            
+            // Securely write file using native PHP
+            if (file_put_contents($imageData['path'], $imageData['decodedData']) === false) {
+                throw new Exception('Failed to write image file to disk.');
+            }
+
+            return $this->response
+                ->withType('application/json')
+                ->withStringBody(json_encode([
+                    'status' => 'success',
+                    'message' => 'Image saved successfully',
+                    'path' => $imageData['imageName']
+                ]));
+
+        } catch (Exception $e) {
+            return $this->response
+                ->withStatus(400)
+                ->withType('application/json')
+                ->withStringBody(json_encode([
+                    'status' => 'error',
+                    'message' => $e->getMessage()
+                ]));
+        }
+    }
+    
+    /**
+     * Decode base64 and validate image integrity.
+     *
+     * @param string $base64String
+     * @return array
+     * @throws \Exception
+     */
+    private function decodeBase64Image(string $base64String): array
+    {
+        // 1. Split structural comma if it exists (e.g., data:image/png;base64,...)
+        if (strpos($base64String, ',') !== false) {
+            $data = explode(',', $base64String);
+            $base64String = $data[1];
+        }
+
+        $decodedData = base64_decode($base64String, true);
+        if (!$decodedData) {
+            throw new Exception('Invalid base64 string alignment.');
+        }
+
+        // 2. Validate image structure safely using a temporary memory stream
+        $imageInfo = getimagesizefromstring($decodedData);
+        if (!$imageInfo) {
+            throw new Exception('The provided file string is not a valid image format.');
+        }
+
+        // 3. Extrapolate mime and extension safely
+        $mime = $imageInfo['mime']; 
+        $allowedTypes = [
+            'image/jpeg' => 'jpg',
+            'image/png'  => 'png',
+            'image/gif'  => 'gif',
+            'image/webp' => 'webp'
+        ];
+
+        if (!array_key_exists($mime, $allowedTypes)) {
+            throw new Exception('Unsupported image type: ' . $mime);
+        }
+
+        $ext = $allowedTypes[$mime];
+        $imageName = 'img_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
+        $path = WWW_ROOT . 'img' . DS . $imageName;
+
+        return [
+            'decodedData' => $decodedData,
+            'path' => $path,
+            'imageName' => $imageName
+        ];
+    }
 }
